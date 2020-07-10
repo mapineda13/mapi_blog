@@ -6,22 +6,16 @@ from database import db
 login_manager = LoginManager()
 
 
-def create_app():
-    app = Flask(__name__)
+def create_app(settings_module):
+    app = Flask(__name__, instance_relative_config=True)
+    # Load the config file specified by the APP environment variable
+    app.config.from_object(settings_module)
+    # Load the configuration from the instance folder
+    if app.config.get('TESTING', False):
+        app.config.from_pyfile('config-testing.py', silent=True)
+    else:
+        app.config.from_pyfile('config.py', silent=True)
 
-    app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'mapi_Keyword'
-    # Configuracion de DB
-    USER_DB = 'postgres'
-    PASS_DB = 'an63m0n13'
-    URL_DB = 'localhost'
-    NAME_DB = 'mapi_blog'
-    FULL_URL_DB = f'postgresql://{USER_DB}:{PASS_DB}@{URL_DB}/{NAME_DB}'
-
-    app.config['SQLALCHEMY_DATABASE_URI'] = FULL_URL_DB
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-    # inicializar objeto app
     db.init_app(app)
 
     # configurar flask migrate
